@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,17 +24,7 @@ class MainActivity : ComponentActivity() {
   super.onCreate(savedInstanceState)
   setContent {
    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-    Home(this) {
-     val web = Uri.parse("https://www.irctc.co.in/nget/train-search")
-     val packages = listOf("cris.org.in.prs.ima", "com.cris.utsmobile")
-     val installed = packages.firstOrNull { pkg ->
-      try { packageManager.getPackageInfo(pkg, 0); true } catch (_: PackageManager.NameNotFoundException) { false }
-     }
-     if (installed != null) {
-      val launch = packageManager.getLaunchIntentForPackage(installed)
-      if (launch != null) startActivity(launch) else startActivity(Intent(Intent.ACTION_VIEW, web))
-     } else startActivity(Intent(Intent.ACTION_VIEW, web))
-    }
+    Home(this) { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.irctc.co.in/nget/train-search"))) }
    }
   }
  }
