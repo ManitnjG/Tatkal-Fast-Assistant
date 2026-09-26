@@ -40,6 +40,9 @@ fun Home(context: Context, openIrctc: () -> Unit) {
  var train by remember { mutableStateOf(prefs.getString("train","") ?: "") }
  var passenger by remember { mutableStateOf(prefs.getString("passenger","") ?: "") }
  var travelClass by remember { mutableStateOf(prefs.getString("class","3A") ?: "3A") }
+ var quota by remember { mutableStateOf(prefs.getString("quota","TATKAL") ?: "TATKAL") }
+ var berth by remember { mutableStateOf(prefs.getString("berth","NO PREFERENCE") ?: "NO PREFERENCE") }
+ var meal by remember { mutableStateOf(prefs.getString("meal","NO PREFERENCE") ?: "NO PREFERENCE") }
  var ac by remember { mutableStateOf(prefs.getBoolean("ac",true)) }
  var aadhaarReady by remember { mutableStateOf(prefs.getBoolean("aadhaar",false)) }
  var walletReady by remember { mutableStateOf(prefs.getBoolean("wallet",false)) }
@@ -47,10 +50,20 @@ fun Home(context: Context, openIrctc: () -> Unit) {
  var copied by remember { mutableStateOf(false) }
 
  val base = listOf(from,to,date,train,passenger).count { it.isNotBlank() }
- val readiness = ((base + if(aadhaarReady) 1 else 0 + if(walletReady) 1 else 0) * 100 / 7).coerceIn(0,100)
+ val readinessItems = base + (if (aadhaarReady) 1 else 0) + (if (walletReady) 1 else 0)
+ val readiness = (readinessItems * 100 / 7).coerceIn(0,100)
+ val missing = buildList {
+  if (from.isBlank()) add("From")
+  if (to.isBlank()) add("To")
+  if (date.isBlank()) add("Date")
+  if (train.isBlank()) add("Train")
+  if (passenger.isBlank()) add("Passenger")
+  if (!aadhaarReady) add("IRCTC/Aadhaar")
+  if (!walletReady) add("eWallet")
+ }
 
  fun copySummary() {
-  val summary = "FROM: $from\nTO: $to\nDATE: $date\nTRAIN: $train\nCLASS: $travelClass\nQUOTA: TATKAL\nPASSENGER: $passenger\nPAYMENT: IRCTC eWallet"
+  val summary = "FROM: $from\nTO: $to\nDATE: $date\nTRAIN: $train\nCLASS: $travelClass\nQUOTA: $quota\nBERTH: $berth\nMEAL: $meal\nPASSENGER: $passenger\nPAYMENT: IRCTC eWallet"
   val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
   clipboard.setPrimaryClip(ClipData.newPlainText("Tatkal booking details", summary))
   copied = true
@@ -58,7 +71,7 @@ fun Home(context: Context, openIrctc: () -> Unit) {
 
  fun save() {
   prefs.edit().putString("from",from).putString("to",to).putString("date",date)
-   .putString("train",train).putString("passenger",passenger).putString("class",travelClass)
+   .putString("train",train).putString("passenger",passenger).putString("class",travelClass).putString("quota",quota).putString("berth",berth).putString("meal",meal)
    .putBoolean("ac",ac).putBoolean("aadhaar",aadhaarReady).putBoolean("wallet",walletReady).apply()
   saved = true
  }
@@ -77,7 +90,7 @@ fun Home(context: Context, openIrctc: () -> Unit) {
      Text("Readiness",style=MaterialTheme.typography.titleMedium); Text("$readiness%")
     }
     LinearProgressIndicator(progress={readiness/100f},modifier=Modifier.fillMaxWidth())
-    Text(if(readiness==100) "Ready for handoff" else "Complete the missing items below")
+    Text(if(readiness==100) "Ready for handoff" else "Missing: ${missing.joinToString()}")
    }}
 
    OutlinedTextField(from,{from=it;saved=false},label={Text("From station / code")},modifier=Modifier.fillMaxWidth(),singleLine=true)
@@ -89,6 +102,18 @@ fun Home(context: Context, openIrctc: () -> Unit) {
    Text("Class",style=MaterialTheme.typography.titleSmall)
    Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
     listOf("1A","2A","3A","SL").forEach { c -> FilterChip(travelClass==c,{travelClass=c;saved=false},label={Text(c)}) }
+   }
+   Text("Quota",style=MaterialTheme.typography.titleSmall)
+   Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+    listOf("TATKAL","PREMIUM TATKAL").forEach { q -> FilterChip(quota==q,{quota=q;saved=false},label={Text(q)}) }
+   }
+   Text("Berth preference",style=MaterialTheme.typography.titleSmall)
+   Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+    listOf("NO PREFERENCE","LOWER","SIDE LOWER").forEach { b -> FilterChip(berth==b,{berth=b;saved=false},label={Text(b)}) }
+   }
+   Text("Meal preference",style=MaterialTheme.typography.titleSmall)
+   Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+    listOf("NO PREFERENCE","VEG","NON VEG").forEach { m -> FilterChip(meal==m,{meal=m;saved=false},label={Text(m)}) }
    }
    Text("Tatkal opening reference",style=MaterialTheme.typography.titleSmall)
    Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
