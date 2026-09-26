@@ -2,6 +2,9 @@ package com.tatkal.fastassistant
 
 import android.content.Context
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,7 +25,17 @@ class MainActivity : ComponentActivity() {
   super.onCreate(savedInstanceState)
   setContent {
    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-    Home(this) { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.irctc.co.in/"))) }
+    Home(this) {
+     val web = Uri.parse("https://www.irctc.co.in/nget/train-search")
+     val packages = listOf("cris.org.in.prs.ima", "com.cris.utsmobile")
+     val installed = packages.firstOrNull { pkg ->
+      try { packageManager.getPackageInfo(pkg, 0); true } catch (_: PackageManager.NameNotFoundException) { false }
+     }
+     if (installed != null) {
+      val launch = packageManager.getLaunchIntentForPackage(installed)
+      if (launch != null) startActivity(launch) else startActivity(Intent(Intent.ACTION_VIEW, web))
+     } else startActivity(Intent(Intent.ACTION_VIEW, web))
+    }
    }
   }
  }
@@ -42,9 +55,17 @@ fun Home(context: Context, openIrctc: () -> Unit) {
  var aadhaarReady by remember { mutableStateOf(prefs.getBoolean("aadhaar",false)) }
  var walletReady by remember { mutableStateOf(prefs.getBoolean("wallet",false)) }
  var saved by remember { mutableStateOf(false) }
+ var copied by remember { mutableStateOf(false) }
 
  val base = listOf(from,to,date,train,passenger).count { it.isNotBlank() }
  val readiness = ((base + if(aadhaarReady) 1 else 0 + if(walletReady) 1 else 0) * 100 / 7).coerceIn(0,100)
+
+ fun copySummary() {
+  val summary = "FROM: $from\nTO: $to\nDATE: $date\nTRAIN: $train\nCLASS: $travelClass\nQUOTA: TATKAL\nPASSENGER: $passenger\nPAYMENT: IRCTC eWallet"
+  val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+  clipboard.setPrimaryClip(ClipData.newPlainText("Tatkal booking details", summary))
+  copied = true
+ }
 
  fun save() {
   prefs.edit().putString("from",from).putString("to",to).putString("date",date)
@@ -102,7 +123,9 @@ fun Home(context: Context, openIrctc: () -> Unit) {
    }}
 
    OutlinedButton({save()},Modifier.fillMaxWidth()) { Text(if(saved) "SAVED ✓" else "SAVE PRESET") }
-   Button({save();openIrctc()},Modifier.fillMaxWidth()) { Text("QUICK BOOK — OPEN IRCTC") }
+   OutlinedButton({save();copySummary()},Modifier.fillMaxWidth()) { Text(if(copied) "DETAILS COPIED ✓" else "COPY BOOKING DETAILS") }
+   Button({save();copySummary();openIrctc()},Modifier.fillMaxWidth()) { Text("COPY DETAILS & OPEN IRCTC") }
+   Text("IRCTC does not provide this app an official browser-form autofill interface. Your prepared details are copied so you can enter them quickly in the official app/site.",style=MaterialTheme.typography.bodySmall)
    Text("CAPTCHA, OTP, payment authorization and final booking remain under your control on IRCTC.",style=MaterialTheme.typography.bodySmall)
    Spacer(Modifier.height(18.dp))
   }
