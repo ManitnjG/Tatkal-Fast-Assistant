@@ -1,10 +1,8 @@
 package com.tatkal.fastassistant
 
 import android.content.Context
-import android.content.Intent
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.WebChromeClient
+import android.webkit.CookieManager
 
 private const val PREFS = "tatkal_prefs"
 
@@ -47,7 +50,8 @@ fun Home(context: Context) {
  var aadhaarReady by remember { mutableStateOf(prefs.getBoolean("aadhaar",false)) }
  var walletReady by remember { mutableStateOf(prefs.getBoolean("wallet",false)) }
  var saved by remember { mutableStateOf(false) }
- var copied by remember { mutableStateOf(false) }\n var showWeb by remember { mutableStateOf(false) }
+ var copied by remember { mutableStateOf(false) }
+ var showWeb by remember { mutableStateOf(false) }
 
  val base = listOf(from,to,date,train,passenger).count { it.isNotBlank() }
  val readinessItems = base + (if (aadhaarReady) 1 else 0) + (if (walletReady) 1 else 0)
@@ -63,7 +67,16 @@ fun Home(context: Context) {
  }
 
  fun copySummary() {
-  val summary = "FROM: $from\nTO: $to\nDATE: $date\nTRAIN: $train\nCLASS: $travelClass\nQUOTA: $quota\nBERTH: $berth\nMEAL: $meal\nPASSENGER: $passenger\nPAYMENT: IRCTC eWallet"
+  val summary = "FROM: $from
+TO: $to
+DATE: $date
+TRAIN: $train
+CLASS: $travelClass
+QUOTA: $quota
+BERTH: $berth
+MEAL: $meal
+PASSENGER: $passenger
+PAYMENT: IRCTC eWallet"
   val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
   clipboard.setPrimaryClip(ClipData.newPlainText("Tatkal booking details", summary))
   copied = true
@@ -76,7 +89,12 @@ fun Home(context: Context) {
   saved = true
  }
 
- if (showWeb) {\n  IrctcWebView(context = context, onClose = { showWeb = false })\n  return\n }\n\n Scaffold(topBar={ TopAppBar(title={ Text("Tatkal Fast Assistant") }) }) { p ->
+ if (showWeb) {
+  IrctcWebView(context = context, onClose = { showWeb = false })
+  return
+ }
+
+ Scaffold(topBar={ TopAppBar(title={ Text("Tatkal Fast Assistant") }) }) { p ->
   Column(
    Modifier.padding(p).padding(horizontal=18.dp).verticalScroll(rememberScrollState()).fillMaxSize(),
    verticalArrangement=Arrangement.spacedBy(12.dp)
@@ -153,9 +171,15 @@ fun IrctcWebView(context: Context, onClose: () -> Unit) {
  val to = prefs.getString("to", "") ?: ""
  val date = prefs.getString("date", "") ?: ""
  val quota = prefs.getString("quota", "TATKAL") ?: "TATKAL"
+ val train = prefs.getString("train", "") ?: ""
+ val travelClass = prefs.getString("class", "SL") ?: "SL"
  var webView by remember { mutableStateOf<WebView?>(null) }
+ var aiStatus by remember { mutableStateOf("AI Assist: watching IRCTC page") }
  val js = remember(from, to, date, quota) { buildAutofillJs(from, to, date, quota) }
+ val assistJs = remember(train, travelClass) { buildAssistJs(train, travelClass) }
 
+ Column(Modifier.fillMaxSize()) {
+  Surface(tonalElevation = 2.dp) { Text(aiStatus, Modifier.fillMaxWidth().padding(8.dp), style=MaterialTheme.typography.bodySmall) }
  Scaffold(topBar = { TopAppBar(
   title = { Text("IRCTC • In-app") },
   navigationIcon = { TextButton(onClick = onClose) { Text("BACK") } },
@@ -179,6 +203,15 @@ fun IrctcWebView(context: Context, onClose: () -> Unit) {
        if (url.contains("irctc.co.in")) {
         view.postDelayed({ view.evaluateJavascript(js, null) }, 900)
         view.postDelayed({ view.evaluateJavascript(js, null) }, 2200)
+        view.postDelayed({ view.evaluateJavascript(assistJs) { result ->
+         aiStatus = when {
+          result.contains("captcha", true) -> "AI Assist: CAPTCHA detected — enter it manually, then continue."
+          result.contains("train", true) -> "AI Assist: train results detected — looking for saved train/class."
+          result.contains("passenger", true) -> "AI Assist: passenger page detected — review details before continuing."
+          result.contains("payment", true) -> "AI Assist: payment page detected — select/confirm payment manually."
+          else -> "AI Assist: journey page ready — review autofilled fields."
+         }
+        } }, 2800)
        }
       }
      }
@@ -187,10 +220,12 @@ fun IrctcWebView(context: Context, onClose: () -> Unit) {
    }
   )
  }
+ }
 }
 
 private fun jsString(value: String): String =
- value.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ")
+ value.replace("\\", "\\\\").replace("'", "\\'").replace("
+", " ")
 
 private fun buildAutofillJs(from: String, to: String, date: String, quota: String): String {
  val f = jsString(from.uppercase())
@@ -234,6 +269,35 @@ private fun buildAutofillJs(from: String, to: String, date: String, quota: Strin
      if(quotaNode) quotaNode.click();
    },1700);
    return 'autofill-attempted';
+ })();
+ """.trimIndent()
+}
+
+
+private fun buildAssistJs(train: String, travelClass: String): String {
+ val tr = jsString(train)
+ val cl = jsString(travelClass)
+ return """
+ (function(){
+   const text=(document.body&&document.body.innerText||'').toUpperCase();
+   // Page-state assistant only. It never reads/solves CAPTCHA, OTP, or submits booking/payment.
+   if(/CAPTCHA|ENTER CAPTCHA/.test(text)) return 'captcha';
+   if(/PASSENGER DETAILS|ADD PASSENGER/.test(text)) return 'passenger';
+   if(/PAYMENT|EWALLET|IRCTC E-WALLET/.test(text)) return 'payment';
+   if(/TRAIN|AVAILABLE|WL|RAC/.test(text)){
+     const nodes=[...document.querySelectorAll('div,span,strong')];
+     const trainNode=nodes.find(n=>(n.innerText||'').includes('$tr'));
+     if(trainNode){
+       trainNode.scrollIntoView({behavior:'smooth',block:'center'});
+       const root=trainNode.closest('app-train-avl-enq, .train_avl_enq_box, .form-group')||trainNode.parentElement;
+       if(root){
+         const cls=[...root.querySelectorAll('button,span,div')].find(n=>(n.innerText||'').trim().toUpperCase()==='$cl');
+         if(cls) cls.scrollIntoView({behavior:'smooth',block:'center'});
+       }
+     }
+     return 'train';
+   }
+   return 'journey';
  })();
  """.trimIndent()
 }
