@@ -4,10 +4,10 @@ plugins {
  id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
- namespace = "in.tatkal.fastassistant"
+ namespace = "com.tatkal.fastassistant"
  compileSdk = 35
  defaultConfig {
-  applicationId = "in.tatkal.fastassistant"
+  applicationId = "com.tatkal.fastassistant"
   minSdk = 26
   targetSdk = 35
   versionCode = 2
