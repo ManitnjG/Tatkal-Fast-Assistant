@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
   super.onCreate(savedInstanceState)
   setContent {
    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-    Home(this) { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.irctc.co.in/nget/train-search"))) }
+    Home(this)
    }
   }
  }
@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(context: Context, openIrctc: () -> Unit) {
+fun Home(context: Context) {
  val prefs = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
  var from by remember { mutableStateOf(prefs.getString("from","") ?: "") }
  var to by remember { mutableStateOf(prefs.getString("to","") ?: "") }
@@ -47,7 +47,7 @@ fun Home(context: Context, openIrctc: () -> Unit) {
  var aadhaarReady by remember { mutableStateOf(prefs.getBoolean("aadhaar",false)) }
  var walletReady by remember { mutableStateOf(prefs.getBoolean("wallet",false)) }
  var saved by remember { mutableStateOf(false) }
- var copied by remember { mutableStateOf(false) }
+ var copied by remember { mutableStateOf(false) }\n var showWeb by remember { mutableStateOf(false) }
 
  val base = listOf(from,to,date,train,passenger).count { it.isNotBlank() }
  val readinessItems = base + (if (aadhaarReady) 1 else 0) + (if (walletReady) 1 else 0)
@@ -76,7 +76,7 @@ fun Home(context: Context, openIrctc: () -> Unit) {
   saved = true
  }
 
- Scaffold(topBar={ TopAppBar(title={ Text("Tatkal Fast Assistant") }) }) { p ->
+ if (showWeb) {\n  IrctcWebView(context = context, onClose = { showWeb = false })\n  return\n }\n\n Scaffold(topBar={ TopAppBar(title={ Text("Tatkal Fast Assistant") }) }) { p ->
   Column(
    Modifier.padding(p).padding(horizontal=18.dp).verticalScroll(rememberScrollState()).fillMaxSize(),
    verticalArrangement=Arrangement.spacedBy(12.dp)
@@ -138,10 +138,102 @@ fun Home(context: Context, openIrctc: () -> Unit) {
 
    OutlinedButton({save()},Modifier.fillMaxWidth()) { Text(if(saved) "SAVED ✓" else "SAVE PRESET") }
    OutlinedButton({save();copySummary()},Modifier.fillMaxWidth()) { Text(if(copied) "DETAILS COPIED ✓" else "COPY BOOKING DETAILS") }
-   Button({save();copySummary();openIrctc()},Modifier.fillMaxWidth()) { Text("COPY DETAILS & OPEN IRCTC") }
-   Text("IRCTC does not provide this app an official browser-form autofill interface. Your prepared details are copied so you can enter them quickly in the official app/site.",style=MaterialTheme.typography.bodySmall)
+   Button({save();copySummary();showWeb=true},Modifier.fillMaxWidth()) { Text("OPEN IRCTC IN APP & AUTOFILL") }
+   Text("IRCTC opens inside this app. The assistant attempts to fill the journey form from your saved preset; review every field before continuing.",style=MaterialTheme.typography.bodySmall)
    Text("CAPTCHA, OTP, payment authorization and final booking remain under your control on IRCTC.",style=MaterialTheme.typography.bodySmall)
    Spacer(Modifier.height(18.dp))
   }
  }
+}
+
+@Composable
+fun IrctcWebView(context: Context, onClose: () -> Unit) {
+ val prefs = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
+ val from = prefs.getString("from", "") ?: ""
+ val to = prefs.getString("to", "") ?: ""
+ val date = prefs.getString("date", "") ?: ""
+ val quota = prefs.getString("quota", "TATKAL") ?: "TATKAL"
+ var webView by remember { mutableStateOf<WebView?>(null) }
+ val js = remember(from, to, date, quota) { buildAutofillJs(from, to, date, quota) }
+
+ Scaffold(topBar = { TopAppBar(
+  title = { Text("IRCTC • In-app") },
+  navigationIcon = { TextButton(onClick = onClose) { Text("BACK") } },
+  actions = { TextButton(onClick = { webView?.evaluateJavascript(js, null) }) { Text("AUTOFILL") } }
+ ) }) { padding ->
+  AndroidView(
+   modifier = Modifier.padding(padding).fillMaxSize(),
+   factory = { ctx ->
+    WebView(ctx).apply {
+     webView = this
+     settings.javaScriptEnabled = true
+     settings.domStorageEnabled = true
+     settings.databaseEnabled = true
+     settings.userAgentString = settings.userAgentString + " TatkalFastAssistant/1.1"
+     CookieManager.getInstance().setAcceptCookie(true)
+     CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+     webChromeClient = WebChromeClient()
+     webViewClient = object : WebViewClient() {
+      override fun onPageFinished(view: WebView, url: String) {
+       super.onPageFinished(view, url)
+       if (url.contains("irctc.co.in")) {
+        view.postDelayed({ view.evaluateJavascript(js, null) }, 900)
+        view.postDelayed({ view.evaluateJavascript(js, null) }, 2200)
+       }
+      }
+     }
+     loadUrl("https://www.irctc.co.in/nget/train-search")
+    }
+   }
+  )
+ }
+}
+
+private fun jsString(value: String): String =
+ value.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ")
+
+private fun buildAutofillJs(from: String, to: String, date: String, quota: String): String {
+ val f = jsString(from.uppercase())
+ val t = jsString(to.uppercase())
+ val d = jsString(date.replace("-", "/"))
+ val q = jsString(quota)
+ return """
+ (function(){
+   const fire=(el,type)=>el.dispatchEvent(new Event(type,{bubbles:true}));
+   const setNative=(el,val)=>{
+     if(!el)return false;
+     const p=Object.getPrototypeOf(el), desc=Object.getOwnPropertyDescriptor(p,'value');
+     if(desc&&desc.set) desc.set.call(el,val); else el.value=val;
+     fire(el,'input'); fire(el,'change'); return true;
+   };
+   const visible=el=>!!(el&&el.offsetParent!==null);
+   const inputs=[...document.querySelectorAll('input')].filter(visible);
+   const byHint=(words)=>inputs.find(el=>{
+     const s=((el.placeholder||'')+' '+(el.getAttribute('aria-label')||'')+' '+(el.id||'')+' '+(el.name||'')).toLowerCase();
+     return words.some(w=>s.includes(w));
+   });
+   const chooseStation=(el,code)=>{
+     if(!el||!code)return;
+     el.focus(); setNative(el,code);
+     el.dispatchEvent(new KeyboardEvent('keyup',{key:code.slice(-1),bubbles:true}));
+     setTimeout(()=>{
+       const opts=[...document.querySelectorAll('[role=option],li.ui-autocomplete-list-item,li.p-autocomplete-item')].filter(visible);
+       const hit=opts.find(x=>(x.innerText||'').toUpperCase().includes(code))||opts[0];
+       if(hit) hit.click();
+     },650);
+   };
+   const fromEl=byHint(['from','origin'])||inputs[0];
+   const toEl=byHint(['to station','destination'])||inputs.find(x=>x!==fromEl&&((x.placeholder||'').toLowerCase().includes('to')));
+   chooseStation(fromEl,'$f');
+   setTimeout(()=>chooseStation(toEl,'$t'),900);
+   setTimeout(()=>{
+     const dateEl=byHint(['dd/mm/yyyy','journey date','date']);
+     if(dateEl){ dateEl.removeAttribute('readonly'); setNative(dateEl,'$d'); fire(dateEl,'blur'); }
+     const texts=[...document.querySelectorAll('span,div,label')].filter(visible);
+     const quotaNode=texts.find(x=>(x.innerText||'').trim().toUpperCase()==='$q');
+     if(quotaNode) quotaNode.click();
+   },1700);
+   return 'autofill-attempted';
+ })();
+ """.trimIndent()
 }
