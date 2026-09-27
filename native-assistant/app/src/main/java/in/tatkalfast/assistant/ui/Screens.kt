@@ -41,7 +41,7 @@ import java.util.Locale
 private fun openOfficial(context: Context) {
  val tab=CustomTabsIntent.Builder().setShowTitle(true).build()
  if(`in`.tatkalfast.assistant.autofill.BrowserTrust.verified(context,`in`.tatkalfast.assistant.autofill.BrowserTrust.CHROME)) tab.intent.setPackage(`in`.tatkalfast.assistant.autofill.BrowserTrust.CHROME)
- tab.launchUrl(context,Uri.parse("https://www.irctc.co.in/nget/train-search"))
+ tab.launchUrl(context,Uri.parse("https://www.irctc.co.in/eticket/train-search"))
 }
 private fun copy(context: Context, text: String) {
  val clipboard=context.getSystemService(ClipboardManager::class.java)

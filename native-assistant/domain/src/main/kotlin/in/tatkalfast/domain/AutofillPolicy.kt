@@ -9,9 +9,9 @@ object AutofillPolicy {
  private val aliases=mapOf(
   PreparedField.PASSENGER_NAME to setOf("passengername","psgnname","travellername","travelername"),
   PreparedField.PASSENGER_AGE to setOf("passengerage","psgnage","age"),
-  PreparedField.MOBILE to setOf("mobilenumber","passengermobile","contactnumber","contactmobile","phonenumber"),
-  PreparedField.FROM to setOf("fromstation","fromstationcode","journeyfrom"),
-  PreparedField.TO to setOf("tostation","tostationcode","journeyto"),
+  PreparedField.MOBILE to setOf("mobile","mobileno","mobilenumber","passengermobile","contactnumber","contactmobile","phonenumber"),
+  PreparedField.FROM to setOf("from","fromstation","fromstationcode","journeyfrom"),
+  PreparedField.TO to setOf("to","tostation","tostationcode","journeyto"),
   PreparedField.BOARDING to setOf("boardingstation","boardingstationcode"),
   PreparedField.TRAIN to setOf("trainnumber","trainno")
  )

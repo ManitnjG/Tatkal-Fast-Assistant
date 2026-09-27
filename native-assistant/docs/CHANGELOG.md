@@ -1,3 +1,9 @@
+# Unreleased — train-search compatibility
+- Open the user-supplied official `/eticket/train-search` URL.
+- Recognize exact short From, To, Mobile and Mobile No. labels and inspect accessibility descriptions/HTML titles.
+- Preserve authenticated review, exact-origin checks and security-field exclusions.
+- Live IRCTC validation remains pending: the inspection browser returned Access Denied. Station suggestions still require the user to select and verify the station; typing a code alone does not establish a selected station.
+
 # v0.3.0
 - Added authenticated encrypted portable backup/restore and atomic conservative merge.
 - Added grouped sibling autofill with partition/origin/ambiguity checks.

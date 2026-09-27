@@ -46,8 +46,8 @@ class PreparedAutofillService:AutofillService() {
     val protocol=node.webScheme?:scheme
     val visible=ancestorVisible && node.visibility==View.VISIBLE
     if(visible && node.autofillType==View.AUTOFILL_TYPE_TEXT && AutofillPolicy.trustedOrigin(domain,protocol)) {
-     val attributes=node.htmlInfo?.attributes.orEmpty().filter {it.first in setOf("id","name","placeholder","autocomplete","formcontrolname","aria-label","type")}.map {it.second}
-     val descriptors=listOfNotNull(node.idEntry,node.hint)+node.autofillHints.orEmpty()+attributes
+     val attributes=node.htmlInfo?.attributes.orEmpty().filter {it.first in setOf("id","name","placeholder","autocomplete","formcontrolname","aria-label","title","type")}.map {it.second}
+     val descriptors=listOfNotNull(node.idEntry,node.hint,node.contentDescription?.toString())+node.autofillHints.orEmpty()+attributes
      val variation=node.inputType and InputType.TYPE_MASK_VARIATION
      val password=variation in setOf(InputType.TYPE_TEXT_VARIATION_PASSWORD,InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,InputType.TYPE_NUMBER_VARIATION_PASSWORD) || attributes.any {it.equals("password",true)}
      val field=AutofillPolicy.classify(descriptors,password)

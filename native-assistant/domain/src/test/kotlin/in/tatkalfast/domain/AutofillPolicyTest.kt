@@ -7,6 +7,19 @@ class AutofillPolicyTest {
  @Test fun exactOfficialHttpsOnly() {assertTrue(AutofillPolicy.trustedOrigin("www.irctc.co.in","https"));assertFalse(AutofillPolicy.trustedOrigin("www.irctc.co.in.evil.test","https"));assertFalse(AutofillPolicy.trustedOrigin("irctc.co.in","http"));assertFalse(AutofillPolicy.trustedOrigin("payments.irctc.co.in","https"))}
  @Test fun recognizesPassengerName() {assertEquals(PreparedField.PASSENGER_NAME,AutofillPolicy.classify(listOf("Passenger Name")))}
  @Test fun recognizesAgeAndStation() {assertEquals(PreparedField.PASSENGER_AGE,AutofillPolicy.classify(listOf("passengerAge")));assertEquals(PreparedField.FROM,AutofillPolicy.classify(listOf("fromStation")))}
+ @Test fun recognizesShortJourneyLabels() {
+  for(label in listOf("From", "FROM*", "From Station")) assertEquals(PreparedField.FROM,AutofillPolicy.classify(listOf(label)))
+  for(label in listOf("To", "TO*", "To Station")) assertEquals(PreparedField.TO,AutofillPolicy.classify(listOf(label)))
+  for(label in listOf("Mobile", "Mobile No.", "Mobile Number")) assertEquals(PreparedField.MOBILE,AutofillPolicy.classify(listOf(label)))
+ }
+ @Test fun shortLabelsStillRejectSecurityAndAmbiguity() {
+  assertNull(AutofillPolicy.classify(listOf("From","To")))
+  assertNull(AutofillPolicy.classify(listOf("Mobile","OTP")))
+  assertNull(AutofillPolicy.classify(listOf("From","password")))
+  assertNull(AutofillPolicy.classify(listOf("To"),true))
+  for(label in listOf("From account","Total","Tomorrow","Date","Gender","Class","Quota"))
+   assertNull(AutofillPolicy.classify(listOf(label)))
+ }
  @Test fun rejectsCaptchaEvenIfFieldClaimsName() {assertNull(AutofillPolicy.classify(listOf("passengerName","captcha")))}
  @Test fun rejectsOtpEvenIfFieldClaimsPhone() {assertNull(AutofillPolicy.classify(listOf("mobileNumber","OTP Verification")))}
  @Test fun rejectsPaymentSecretsAndPasswords() {for(secret in listOf("UPI PIN","card number","CVV","password","Aadhaar","wallet","transaction")) assertNull(AutofillPolicy.classify(listOf("passengerName",secret)));assertNull(AutofillPolicy.classify(listOf("passengerName"),true))}
