@@ -1,0 +1,32 @@
+name: Chrome extension tests and ZIP
+on:
+  push:
+    paths: ['chrome-extension/**', '.github/workflows/chrome-extension.yml']
+  pull_request:
+    paths: ['chrome-extension/**', '.github/workflows/chrome-extension.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+        working-directory: chrome-extension
+      - name: Validate scripts and manifest
+        run: |
+          for file in chrome-extension/*.js; do node --check "$file"; done
+          python3 -m json.tool chrome-extension/manifest.json > /dev/null
+      - name: Package extension
+        run: |
+          mkdir Tatkal-AI-Chrome-Extension
+          cp chrome-extension/*.js chrome-extension/*.html chrome-extension/*.css chrome-extension/manifest.json chrome-extension/README.md Tatkal-AI-Chrome-Extension/
+          zip -r Tatkal-AI-Chrome-Extension.zip Tatkal-AI-Chrome-Extension
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tatkal-AI-Chrome-Extension
+          path: Tatkal-AI-Chrome-Extension.zip

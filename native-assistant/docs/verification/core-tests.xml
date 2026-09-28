@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites><testsuite name="in.tatkalfast.domain.AutofillPolicyTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-09-27T15:40:32" hostname="d5a70b98796c" time="0.103">
+  <properties />
+  <testcase name="onlySelectedSnapshotPassenger" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.089" />
+  <testcase name="agePhoneAndRouteValues" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.001" />
+  <testcase name="rejectsPaymentSecretsAndPasswords" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.001" />
+  <testcase name="recognizesAgeAndStation" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.002" />
+  <testcase name="rejectsUnknownAndConflictingFields" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <testcase name="bothHistoryAndPaymentMustBeChecked" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.002" />
+  <testcase name="exactOfficialHttpsOnly" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <testcase name="confirmedPaidBookingRequiresPnr" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.002" />
+  <testcase name="pendingUnknownAndResolvedNeverFill" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <testcase name="rejectsOtpEvenIfFieldClaimsPhone" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <testcase name="terminalReconciliationPersistsEvidence" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <testcase name="recognizesPassengerName" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <testcase name="pendingOrUnknownCannotUnlock" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.001" />
+  <testcase name="rejectsCaptchaEvenIfFieldClaimsName" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.001" />
+  <testcase name="paidWithoutBookingCannotUnlock" classname="in.tatkalfast.domain.AutofillPolicyTest" time="0.0" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="in.tatkalfast.domain.BookingEngineTest" tests="31" skipped="0" failures="0" errors="0" timestamp="2026-09-27T15:40:32" hostname="d5a70b98796c" time="0.076">
+  <properties />
+  <testcase name="stationCodesMustDiffer" classname="in.tatkalfast.domain.BookingEngineTest" time="0.016" />
+  <testcase name="pastJourneyRejected" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="verifiedFailureAllowsAnotherAttempt" classname="in.tatkalfast.domain.BookingEngineTest" time="0.003" />
+  <testcase name="happyChecklist" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="calendarRollover" classname="in.tatkalfast.domain.BookingEngineTest" time="0.003" />
+  <testcase name="uncertainNetworkNeverUnlocks" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="cannotResolveWithoutVerification" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="confirmedSnapshotIsIndependentOfProfiles" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="countdownBeforeOpening" classname="in.tatkalfast.domain.BookingEngineTest" time="0.007" />
+  <testcase name="tamilPassengerNameAccepted" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="malformedDateDoesNotCrashCountdown" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="invalidPnrRejected" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="premiumUsesSameOpening" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="duplicatePreparedBlocked" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="noTatkalFor1AOrGeneral" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="tatkalPassengerLimit" classname="in.tatkalfast.domain.BookingEngineTest" time="0.014" />
+  <testcase name="invalidPassengerName" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="originDateNotBoardingDate" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="countdownClampsAtZero" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="missingSelectedPassengerRejected" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="cannotCancelAfterHandoff" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="paymentSessionLossStaysUnknown" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="unlaunchedPreparationRestores" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="sleeperOpensAt11IST" classname="in.tatkalfast.domain.BookingEngineTest" time="0.002" />
+  <testcase name="acOpensAt10IST" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="processRecoveryLocksUnknown" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="ageBoundaries" classname="in.tatkalfast.domain.BookingEngineTest" time="0.0" />
+  <testcase name="loginSessionCanRestartLogin" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="duplicateHandoffBlocked" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="childDetailsCanBePreparedForOfficialReview" classname="in.tatkalfast.domain.BookingEngineTest" time="0.001" />
+  <testcase name="validJourney" classname="in.tatkalfast.domain.BookingEngineTest" time="0.003" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="in.tatkalfast.domain.ConfirmationParserTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-27T15:40:33" hostname="d5a70b98796c" time="0.022">
+  <properties />
+  <testcase name="rejectsAmbiguousPnrs" classname="in.tatkalfast.domain.ConfirmationParserTest" time="0.02" />
+  <testcase name="rejectsPhoneAndOtp" classname="in.tatkalfast.domain.ConfirmationParserTest" time="0.001" />
+  <testcase name="rejectsLongNumber" classname="in.tatkalfast.domain.ConfirmationParserTest" time="0.0" />
+  <testcase name="labelledPnr" classname="in.tatkalfast.domain.ConfirmationParserTest" time="0.001" />
+  <testcase name="repeatedSamePnrAccepted" classname="in.tatkalfast.domain.ConfirmationParserTest" time="0.0" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="in.tatkalfast.domain.FillGroupingTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-09-27T15:40:33" hostname="d5a70b98796c" time="0.006">
+  <properties />
+  <testcase name="routeSiblingsGrouped" classname="in.tatkalfast.domain.FillGroupingTest" time="0.002" />
+  <testcase name="ambiguousAgeExcluded" classname="in.tatkalfast.domain.FillGroupingTest" time="0.0" />
+  <testcase name="multipleFocusFailsClosed" classname="in.tatkalfast.domain.FillGroupingTest" time="0.0" />
+  <testcase name="siblingNameAgeShareReview" classname="in.tatkalfast.domain.FillGroupingTest" time="0.001" />
+  <testcase name="contactPartitionNotMixedWithPassenger" classname="in.tatkalfast.domain.FillGroupingTest" time="0.001" />
+  <testcase name="ambiguousFocusedTypeUsesSingleField" classname="in.tatkalfast.domain.FillGroupingTest" time="0.0" />
+  <testcase name="otherPassengerRowExcluded" classname="in.tatkalfast.domain.FillGroupingTest" time="0.001" />
+  <testcase name="otherOriginExcluded" classname="in.tatkalfast.domain.FillGroupingTest" time="0.001" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="in.tatkalfast.domain.PortableBackupTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-09-27T15:40:33" hostname="d5a70b98796c" time="4.208">
+  <properties />
+  <testcase name="encryptedBytesHideNames" classname="in.tatkalfast.domain.PortableBackupTest" time="0.782" />
+  <testcase name="weakPassphraseRejected" classname="in.tatkalfast.domain.PortableBackupTest" time="0.002" />
+  <testcase name="unsupportedVersionRejected" classname="in.tatkalfast.domain.PortableBackupTest" time="0.34" />
+  <testcase name="oversizedFileRejectedBeforeKdf" classname="in.tatkalfast.domain.PortableBackupTest" time="0.045" />
+  <testcase name="randomizedEncryption" classname="in.tatkalfast.domain.PortableBackupTest" time="0.726" />
+  <testcase name="backupRoundTrip" classname="in.tatkalfast.domain.PortableBackupTest" time="0.598" />
+  <testcase name="duplicateIdsRejected" classname="in.tatkalfast.domain.PortableBackupTest" time="0.0" />
+  <testcase name="wrongPasswordFails" classname="in.tatkalfast.domain.PortableBackupTest" time="0.548" />
+  <testcase name="restoreRecoversUnknownAndKeepsLock" classname="in.tatkalfast.domain.PortableBackupTest" time="0.001" />
+  <testcase name="tamperFailsAuthentication" classname="in.tatkalfast.domain.PortableBackupTest" time="0.569" />
+  <testcase name="repeatedRestoreDoesNotDuplicate" classname="in.tatkalfast.domain.PortableBackupTest" time="0.001" />
+  <testcase name="archivedProfileWithDeletedPassengerCanBeBackedUp" classname="in.tatkalfast.domain.PortableBackupTest" time="0.593" />
+  <testcase name="differentActiveAttemptsRejectWholeMerge" classname="in.tatkalfast.domain.PortableBackupTest" time="0.001" />
+  <testcase name="localProfileWinsIdCollision" classname="in.tatkalfast.domain.PortableBackupTest" time="0.0" />
+  <testcase name="incomingResolvedCannotEraseLocalPending" classname="in.tatkalfast.domain.PortableBackupTest" time="0.0" />
+  <system-out />
+  <system-err />
+</testsuite></testsuites>

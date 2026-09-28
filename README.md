@@ -1,3 +1,11 @@
+## Native assistant upgrade (v0.3 preview)
+
+The complete Kotlin/Compose assistant is in [native-assistant](native-assistant/README.md). Open that folder as the Android Studio project. It includes encrypted profiles and backups, guarded autofill, conservative payment recovery, bilingual UI, local history and tests. The original root app remains available for comparison; it has a different package ID and no automatic private-data migration.
+
+Use **Native assistant checks and preview APK** in Actions. Signed native releases use tags `native-vX.Y.Z` and the signing secrets documented in the new project's README. Preview APKs install alongside older apps. No live IRCTC transaction integration or ticket-success guarantee is claimed.
+
+---
+
 # Tatkal Fast Assistant
 
 Fast native Android preparation companion for the official IRCTC booking flow.
